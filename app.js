@@ -25,6 +25,16 @@ const initializeDbAndServer = async () => {
 };
 initializeDbAndServer();
 
+//convertingsnakeCAseToCamelCase
+const convertDbObjectToResponseObject = (dbObject) => {
+  return {
+    playerId: dbObject.player_id,
+    playerName: dbObject.player_name,
+    jerseyNumber: dbObject.jersey_number,
+    role: dbObject.role,
+  };
+};
+
 //Get players
 
 app.get("/players/", async (request, response) => {
@@ -36,7 +46,11 @@ app.get("/players/", async (request, response) => {
     ORDER BY
         player_id;`;
   const playersArray = await db.all(getPlayersQuery);
-  response.send(playersArray);
+  response.send(
+    playersArray.map((eachPlayer) =>
+      convertDbObjectToResponseObject(eachPlayer)
+    )
+  );
 });
 
 //post player
@@ -67,8 +81,8 @@ app.get("/players/:playerId/", async (request, response) => {
         cricket_team
     WHERE 
         player_id = ${playerId};`;
-  const playerArray = await db.get(getPlayer);
-  response.send(playerArray);
+  const player = await db.all(getPlayer);
+  response.send(player.map((each) => convertDbObjectToResponseObject(each)));
 });
 
 //update player
